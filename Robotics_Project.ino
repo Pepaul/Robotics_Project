@@ -38,7 +38,7 @@ void loop() {
   delay(100);
 
   int sensorState = lineFinder.readSensors();
-  switch(sensorState)
+  switch(sensorState) //test
   {
     case S1_IN_S2_IN:
     //Serial.println("Sensor 1 and 2 are inside of black line"); break;
