@@ -7,6 +7,7 @@ MeMegaPiDCMotor motor4(PORT4B); // Gripper
 
 MeUltrasonicSensor ultraSensor(PORT_7); // Ultrasonic sensor port
 
+<<<<<<< Updated upstream
 uint8_t motorSpeed = 90;      // Speed for forward movement
 uint8_t rotationSpeed = 90;   // Speed for rotating in place
 uint8_t armSpeed = 50;        // Slower speed for precise arm movement
@@ -16,6 +17,17 @@ uint16_t detectionDistanceClose = 12; // Final pickup distance
 
 uint8_t leftMotorSpeed = 80;     // Adjust this to balance movement
 uint8_t rightMotorSpeed = 90;    // Reduce slightly if the right motor is faster
+=======
+uint8_t motorSpeed = 90;     // Speed for forward movement
+uint8_t rotationSpeed = 70; // Speed for rotating in place
+uint8_t armSpeed = 50;       // Slower speed for precise arm movement
+uint16_t detectionDistance = 25; // Object detection distance
+uint16_t grippingDistance = 13; // Object close enough to grip
+
+float alpha = 0.8; //Used for rolling average of sensor reading
+float previousDistance = 400;
+float averageDistance;
+>>>>>>> Stashed changes
 
 // Function to initialize arm position
 void initializeArmPosition() {
@@ -44,7 +56,7 @@ void objectFound() {
     motor3.stop();
 
     motor4.run(-120);  
-    delay(2500);       
+    delay(3000);       
     motor4.stop();
 
     motor3.run(100); 
@@ -61,6 +73,7 @@ void objectFound() {
     delay(10000);
 }
 
+<<<<<<< Updated upstream
 // Function to hone in on an object
 void honeInOnObject() {
     float minDistance = 999;  // Start with an impossible high value
@@ -74,6 +87,52 @@ void honeInOnObject() {
     if (leftDistance < minDistance) {
         minDistance = leftDistance;
         bestDirection = -1;  // Track left as the best path
+=======
+//Try to find the local minumum
+void wiggle() {
+  float distance = ultraSensor.distanceCm();
+  float minimum = 400.0;
+  while (distance >= minimum && distance < grippingDistance) {
+    if (distance < minimum) {
+      minimum = distance;
+    }
+    motor1.run(10);
+    motor2.run(10);
+    delay(100);
+    motor1.stop();
+    motor2.stop();
+    //motor1.run(-rotationSpeed);
+    //motor2.run(-rotationSpeed);
+    //delay(150);
+    //motor1.stop();
+    //motor2.stop();
+    distance = ultraSensor.distanceCm();
+  }
+}
+// Function to move toward the detected object
+void moveTowardObject() {
+    Serial.println("Moving Toward Object...");
+
+    motor1.run(-motorSpeed/2);
+    motor2.run(motorSpeed/2);
+
+    // Continue moving until object is 14 cm away
+    while (true) {
+        float distance = ultraSensor.distanceCm();
+        //averageDistance = alpha*distance + (1-alpha)*previousDistance;
+        
+        //if (averageDistance > 0 && averageDistance <= detectionDistance) {
+        if (distance > 0 && distance <= grippingDistance) {
+            Serial.println("Object Reached! Engaging Pickup Process...");
+            //wiggle();
+            motor1.stop();
+            motor2.stop();
+            objectFound();
+            return;
+        }
+        previousDistance = distance;
+        delay(100);  // Delay for stable distance readings
+>>>>>>> Stashed changes
     }
 
     // Return to Center
@@ -132,21 +191,34 @@ bool scanForObjects() {
     motor1.run(rightMotorSpeed);
     motor2.run(leftMotorSpeed);
 
+<<<<<<< Updated upstream
     unsigned long startTime = millis();
     while (millis() - startTime < 800) {
+=======
+    //unsigned long startTime = millis();  // Track how long the scan runs
+    //while (millis() - startTime < 800) { // Scan for 800ms (adjust for desired turn angle)
+>>>>>>> Stashed changes
         distance = ultraSensor.distanceCm();
 
         if (distance > 0 && distance <= detectionDistanceFar) {
             Serial.println("Object Detected (Left Side)!");
+            delay(200);
             motor1.stop();
             motor2.stop();
             honeInOnObject();
             return true;
         }
+<<<<<<< Updated upstream
 
         delay(50);  // Short delay for stability during scanning
     }
 
+=======
+        previousDistance = distance;
+        delay(100);  // Short delay for stability during scanning
+    //}
+    /*
+>>>>>>> Stashed changes
     // Return to Center
     motor1.run(-rightMotorSpeed);
     motor2.run(-leftMotorSpeed);
@@ -181,7 +253,7 @@ bool scanForObjects() {
     motor1.stop();
     motor2.stop();
     delay(50);
-
+    */
     return false; // No object detected during scanning
 }
 
@@ -192,10 +264,16 @@ void setup() {
 
 void loop() {
     // Continuously move forward
+<<<<<<< Updated upstream
     motor1.run(-rightMotorSpeed);
     motor2.run(leftMotorSpeed);
+=======
+    /*
+    motor1.run(-motorSpeed);
+    motor2.run(motorSpeed);
+>>>>>>> Stashed changes
     delay(750);
-
+    */
     // Check for an object directly in front
     float distance = ultraSensor.distanceCm();
 
